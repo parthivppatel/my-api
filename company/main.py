@@ -5,6 +5,7 @@ from typing import List
 
 import crud, models, schemas
 from database import SessionLocal, engine
+from models import User,Staff,Role
 
 # models.Base.metadata.create_all(bind=engine)
 
@@ -35,9 +36,12 @@ def read_users(db: Session = Depends(get_db)):
     users = crud.get_users(db)
     return users
 
-@app.get("/user_Role/", response_model=List[schemas.User_role])
+@app.get("/user_Role/")
 def roles_of_users(db: Session = Depends(get_db)):
-    return crud.user_role(db)
+    first= db.query(User.id,User.name,User.email,User.is_admin,User.is_active,Role.types)\
+    .join(Staff,Staff.user_id==User.id).all()
+    # .outerjoin(Role,Role.id==Staff.role_id).all()       
+    return first
 
 
 @app.get("/users/{user_id}", response_model=schemas.User)
